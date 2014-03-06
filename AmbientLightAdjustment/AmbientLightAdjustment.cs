@@ -26,20 +26,27 @@ namespace AmbientLightAdjustment {
 	[KSPAddon(KSPAddon.Startup.EveryScene, false)]
 	internal class AmbientLightAdjustment : MonoBehaviour {
 		private IButton button;
-		private float level;
-		private Color defaultAmbience = new Color(float.MinValue, float.MinValue, float.MinValue);
-		private bool useDefaultAmbience = true;
+		private AmbienceSetting setting;
+		private AmbienceSetting secondSetting;
+		private Color defaultAmbience;
+		private bool listenToSliderChange = true;
 
 		public void Start() {
 			if (isRelevantScene()) {
 				button = ToolbarManager.Instance.add("AmbientLightAdjustment", "adjustLevels");
 				button.TexturePath = "blizzy/AmbientLightAdjustment/contrast";
-				button.ToolTip = "Ambient Light Adjustment (Right-Click to Reset)";
+				button.ToolTip = "Ambient Light Adjustment";
 				button.OnClick += (e) => {
-					if (e.MouseButton == 1) {
-						resetToDefault();
-					} else {
-						toggleAdjustmentUI();
+					switch (e.MouseButton) {
+						case 1:
+							resetToDefaultAmbience();
+							break;
+						case 2:
+							switchToSecondSetting();
+							break;
+						default:
+							toggleAdjustmentUI();
+							break;
 					}
 				};
 			}
@@ -66,46 +73,65 @@ namespace AmbientLightAdjustment {
 
 		private void showAdjustmentUI() {
 			AdjustmentDrawable adjustment = new AdjustmentDrawable();
-			adjustment.Level = level;
 
 			adjustment.OnLevelChanged += () => {
-				level = adjustment.Level;
-				useDefaultAmbience = false;
+				if (listenToSliderChange) {
+					setting.level = adjustment.Level;
+					setting.useDefaultAmbience = false;
+				}
 			};
 
 			button.Drawable = adjustment;
+			updateSliderFromSetting();
 		}
 
 		private void hideAdjustmentUI() {
 			button.Drawable = null;
 		}
 
-		private void resetToDefault() {
+		private void resetToDefaultAmbience() {
+			setting.level = defaultAmbience.grayscale;
+			setting.useDefaultAmbience = true;
+			updateSliderFromSetting();
+		}
+
+		private void switchToSecondSetting() {
+			AmbienceSetting temp = setting;
+			setting = secondSetting;
+			secondSetting = temp;
+			updateSliderFromSetting();
+		}
+
+		private void updateSliderFromSetting() {
 			if (button.Drawable != null) {
-				((AdjustmentDrawable) button.Drawable).Level = (defaultAmbience.r + defaultAmbience.g + defaultAmbience.b) / 3f;
-			} else {
-				level = (defaultAmbience.r + defaultAmbience.g + defaultAmbience.b) / 3f;
+				listenToSliderChange = false;
+				((AdjustmentDrawable) button.Drawable).Level = setting.level;
+				listenToSliderChange = true;
 			}
-			useDefaultAmbience = true;
 		}
 
 		public void LateUpdate() {
 			if (isRelevantScene()) {
-				Color defaultAmbience = RenderSettings.ambientLight;
-				if (!defaultAmbience.Equals(this.defaultAmbience)) {
-					// default ambience has changed
-					this.defaultAmbience = defaultAmbience;
-					if (useDefaultAmbience) {
-						// using default ambience, set level slider to default ambience
-						resetToDefault();
-					}
+				defaultAmbience = RenderSettings.ambientLight;
+
+				if (setting == null) {
+					setting = new AmbienceSetting() {
+						useDefaultAmbience = true,
+						level = defaultAmbience.grayscale
+					};
+				}
+				if (secondSetting == null) {
+					secondSetting = new AmbienceSetting() {
+						useDefaultAmbience = true,
+						level = defaultAmbience.grayscale
+					};
 				}
 
-				if (!useDefaultAmbience) {
+				if (!setting.useDefaultAmbience) {
 					Color ambience = defaultAmbience;
-					ambience.r = level;
-					ambience.g = level;
-					ambience.b = level;
+					ambience.r = setting.level;
+					ambience.g = setting.level;
+					ambience.b = setting.level;
 					RenderSettings.ambientLight = ambience;
 				}
 			}

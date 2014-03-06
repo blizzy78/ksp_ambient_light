@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AdjustmentDrawable.cs" />
+    <Compile Include="AmbienceSetting.cs" />
     <Compile Include="AmbientLightAdjustment.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
