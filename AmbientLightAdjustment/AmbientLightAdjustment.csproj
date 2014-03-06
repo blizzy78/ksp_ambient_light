@@ -55,6 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="CHANGES.txt" />
+    <Content Include="etc\screenshot.png" />
     <Content Include="LICENSE.txt" />
   </ItemGroup>
   <ItemGroup>
