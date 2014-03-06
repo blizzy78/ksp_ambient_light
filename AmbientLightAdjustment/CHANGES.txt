@@ -1,2 +1,7 @@
-﻿1.0.0, 2014-03-05
+﻿1.1.0, 2014-03-06
+- Added the ability to toggle between the current and the previous setting by
+  clicking the toolbar button using the middle mouse button.
+- Both settings are now persisted between scene changes and KSP restarts.
+
+1.0.0, 2014-03-05
 - Initial public release.
