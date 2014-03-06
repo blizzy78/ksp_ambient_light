@@ -51,6 +51,7 @@
     <Compile Include="AdjustmentDrawable.cs" />
     <Compile Include="AmbienceSetting.cs" />
     <Compile Include="AmbientLightAdjustment.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

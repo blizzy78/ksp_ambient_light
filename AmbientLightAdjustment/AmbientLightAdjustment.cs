@@ -25,6 +25,8 @@ using Toolbar;
 namespace AmbientLightAdjustment {
 	[KSPAddon(KSPAddon.Startup.EveryScene, false)]
 	internal class AmbientLightAdjustment : MonoBehaviour {
+		private static readonly string SETTINGS_FILE = KSPUtil.ApplicationRootPath + "GameData/blizzy/AmbientLightAdjustment/settings.dat";
+
 		private IButton button;
 		private AmbienceSetting setting;
 		private AmbienceSetting secondSetting;
@@ -49,6 +51,8 @@ namespace AmbientLightAdjustment {
 							break;
 					}
 				};
+
+				loadSettings();
 			}
 		}
 
@@ -57,6 +61,28 @@ namespace AmbientLightAdjustment {
 				button.Destroy();
 				button = null;
 			}
+		}
+
+		private void loadSettings() {
+			ConfigNode settings = ConfigNode.Load(SETTINGS_FILE) ?? new ConfigNode();
+			if (settings.HasNode("ambience")) {
+				ConfigNode ambienceNode = settings.GetNode("ambience");
+				ConfigNode[] settingNodes = ambienceNode.GetNodes("setting");
+				if (settingNodes.Length >= 1) {
+					setting = AmbienceSetting.create(settingNodes[0]);
+				}
+				if (settingNodes.Length >= 2) {
+					secondSetting = AmbienceSetting.create(settingNodes[1]);
+				}
+			}
+		}
+
+		private void saveSettings() {
+			ConfigNode root = new ConfigNode();
+			ConfigNode ambienceNode = root.AddNode("ambience");
+			setting.save(ambienceNode.AddNode("setting"));
+			secondSetting.save(ambienceNode.AddNode("setting"));
+			root.Save(SETTINGS_FILE);
 		}
 
 		private bool isRelevantScene() {
@@ -76,8 +102,9 @@ namespace AmbientLightAdjustment {
 
 			adjustment.OnLevelChanged += () => {
 				if (listenToSliderChange) {
-					setting.level = adjustment.Level;
-					setting.useDefaultAmbience = false;
+					setting.Level = adjustment.Level;
+					setting.UseDefaultAmbience = false;
+					saveSettings();
 				}
 			};
 
@@ -90,9 +117,10 @@ namespace AmbientLightAdjustment {
 		}
 
 		private void resetToDefaultAmbience() {
-			setting.level = defaultAmbience.grayscale;
-			setting.useDefaultAmbience = true;
+			setting.Level = defaultAmbience.grayscale;
+			setting.UseDefaultAmbience = true;
 			updateSliderFromSetting();
+			saveSettings();
 		}
 
 		private void switchToSecondSetting() {
@@ -100,12 +128,13 @@ namespace AmbientLightAdjustment {
 			setting = secondSetting;
 			secondSetting = temp;
 			updateSliderFromSetting();
+			saveSettings();
 		}
 
 		private void updateSliderFromSetting() {
 			if (button.Drawable != null) {
 				listenToSliderChange = false;
-				((AdjustmentDrawable) button.Drawable).Level = setting.level;
+				((AdjustmentDrawable) button.Drawable).Level = setting.Level;
 				listenToSliderChange = true;
 			}
 		}
@@ -116,22 +145,22 @@ namespace AmbientLightAdjustment {
 
 				if (setting == null) {
 					setting = new AmbienceSetting() {
-						useDefaultAmbience = true,
-						level = defaultAmbience.grayscale
+						UseDefaultAmbience = true,
+						Level = defaultAmbience.grayscale
 					};
 				}
 				if (secondSetting == null) {
 					secondSetting = new AmbienceSetting() {
-						useDefaultAmbience = true,
-						level = defaultAmbience.grayscale
+						UseDefaultAmbience = true,
+						Level = defaultAmbience.grayscale
 					};
 				}
 
-				if (!setting.useDefaultAmbience) {
+				if (!setting.UseDefaultAmbience) {
 					Color ambience = defaultAmbience;
-					ambience.r = setting.level;
-					ambience.g = setting.level;
-					ambience.b = setting.level;
+					ambience.r = setting.Level;
+					ambience.g = setting.Level;
+					ambience.b = setting.Level;
 					RenderSettings.ambientLight = ambience;
 				}
 			}

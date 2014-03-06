@@ -19,23 +19,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using UnityEngine;
 
 namespace AmbientLightAdjustment {
-	internal class AmbienceSetting {
-		internal bool UseDefaultAmbience;
-		internal float Level;
-
-		internal void save(ConfigNode settingNode) {
-			settingNode.overwrite("useDefaultAmbience", UseDefaultAmbience.ToString());
-			settingNode.overwrite("level", Level.ToString());
-		}
-
-		internal static AmbienceSetting create(ConfigNode settingNode) {
-			return new AmbienceSetting() {
-				UseDefaultAmbience = bool.Parse(settingNode.GetValue("useDefaultAmbience")),
-				Level = float.Parse(settingNode.GetValue("level"))
-			};
+	internal static class Extensions {
+		internal static void overwrite(this ConfigNode configNode, string name, object value) {
+			if (configNode.HasValue(name)) {
+				configNode.RemoveValue(name);
+			}
+			configNode.AddValue(name, value);
 		}
 	}
 }
