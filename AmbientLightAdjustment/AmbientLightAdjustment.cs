@@ -26,8 +26,9 @@ namespace AmbientLightAdjustment {
 	[KSPAddon(KSPAddon.Startup.EveryScene, false)]
 	internal class AmbientLightAdjustment : MonoBehaviour {
 		private IButton button;
-		private float defaultLevel;
 		private float level;
+		private Color defaultAmbience = new Color(float.MinValue, float.MinValue, float.MinValue);
+		private bool useDefaultAmbience = true;
 
 		public void Start() {
 			if (isRelevantScene()) {
@@ -41,9 +42,6 @@ namespace AmbientLightAdjustment {
 						toggleAdjustmentUI();
 					}
 				};
-
-				defaultLevel = RenderSettings.ambientLight.r;
-				level = defaultLevel;
 			}
 		}
 
@@ -72,6 +70,7 @@ namespace AmbientLightAdjustment {
 
 			adjustment.OnLevelChanged += () => {
 				level = adjustment.Level;
+				useDefaultAmbience = false;
 			};
 
 			button.Drawable = adjustment;
@@ -83,19 +82,32 @@ namespace AmbientLightAdjustment {
 
 		private void resetToDefault() {
 			if (button.Drawable != null) {
-				((AdjustmentDrawable) button.Drawable).Level = defaultLevel;
+				((AdjustmentDrawable) button.Drawable).Level = (defaultAmbience.r + defaultAmbience.g + defaultAmbience.b) / 3f;
 			} else {
-				level = defaultLevel;
+				level = (defaultAmbience.r + defaultAmbience.g + defaultAmbience.b) / 3f;
 			}
+			useDefaultAmbience = true;
 		}
 
 		public void LateUpdate() {
 			if (isRelevantScene()) {
-				Color ambience = RenderSettings.ambientLight;
-				ambience.r = level;
-				ambience.g = level;
-				ambience.b = level;
-				RenderSettings.ambientLight = ambience;
+				Color defaultAmbience = RenderSettings.ambientLight;
+				if (!defaultAmbience.Equals(this.defaultAmbience)) {
+					// default ambience has changed
+					this.defaultAmbience = defaultAmbience;
+					if (useDefaultAmbience) {
+						// using default ambience, set level slider to default ambience
+						resetToDefault();
+					}
+				}
+
+				if (!useDefaultAmbience) {
+					Color ambience = defaultAmbience;
+					ambience.r = level;
+					ambience.g = level;
+					ambience.b = level;
+					RenderSettings.ambientLight = ambience;
+				}
 			}
 		}
 	}
