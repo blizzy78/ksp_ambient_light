@@ -86,7 +86,7 @@ namespace AmbientLightAdjustment {
 		}
 
 		private bool isRelevantScene() {
-			return HighLogic.LoadedScene == GameScenes.FLIGHT;
+			return HighLogic.LoadedSceneIsFlight;
 		}
 
 		private void toggleAdjustmentUI() {
