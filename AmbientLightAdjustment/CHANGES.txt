@@ -1,4 +1,7 @@
-﻿1.1.0, 2014-03-06
+﻿1.1.1, 2014-07-18
+- Updated for KSP 0.24.0 and Toolbar Plugin 1.7.4 (included.)
+
+1.1.0, 2014-03-06
 - Added the ability to toggle between the current and the previous setting by
   clicking the toolbar button using the middle mouse button.
 - Both settings are now persisted between scene changes and KSP restarts.
