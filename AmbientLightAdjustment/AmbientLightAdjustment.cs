@@ -25,6 +25,8 @@ using Toolbar;
 namespace AmbientLightAdjustment {
 	[KSPAddon(KSPAddon.Startup.EveryScene, false)]
 	internal class AmbientLightAdjustment : MonoBehaviour {
+		internal static int VERSION = 1;
+
 		private static readonly string SETTINGS_FILE = KSPUtil.ApplicationRootPath + "GameData/blizzy/AmbientLightAdjustment/settings.dat";
 
 		private IButton button;
