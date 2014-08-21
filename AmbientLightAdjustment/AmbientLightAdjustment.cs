@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -28,6 +29,7 @@ namespace AmbientLightAdjustment {
 		internal static int VERSION = 1;
 
 		private static readonly string SETTINGS_FILE = KSPUtil.ApplicationRootPath + "GameData/blizzy/AmbientLightAdjustment/settings.dat";
+		private const int AUTO_HIDE_DELAY = 5;
 
 		private IButton button;
 		private AmbienceSetting setting;
@@ -40,6 +42,7 @@ namespace AmbientLightAdjustment {
 				button = ToolbarManager.Instance.add("AmbientLightAdjustment", "adjustLevels");
 				button.TexturePath = "blizzy/AmbientLightAdjustment/contrast";
 				button.ToolTip = "Ambient Light Adjustment";
+				button.Visibility = new GameScenesVisibility(GameScenes.FLIGHT, GameScenes.TRACKSTATION);
 				button.OnClick += (e) => {
 					switch (e.MouseButton) {
 						case 1:
@@ -88,7 +91,7 @@ namespace AmbientLightAdjustment {
 		}
 
 		private bool isRelevantScene() {
-			return HighLogic.LoadedSceneIsFlight;
+			return HighLogic.LoadedSceneIsFlight || (HighLogic.LoadedScene == GameScenes.TRACKSTATION);
 		}
 
 		private void toggleAdjustmentUI() {
@@ -107,15 +110,33 @@ namespace AmbientLightAdjustment {
 					setting.Level = adjustment.Level;
 					setting.UseDefaultAmbience = false;
 					saveSettings();
+					startAutoHide();
 				}
 			};
 
 			button.Drawable = adjustment;
 			updateSliderFromSetting();
+
+			startAutoHide();
 		}
 
 		private void hideAdjustmentUI() {
+			stopAutoHide();
 			button.Drawable = null;
+		}
+
+		private void startAutoHide() {
+			stopAutoHide();
+			StartCoroutine("doAutoHide");
+		}
+
+		private void stopAutoHide() {
+			StopCoroutine("doAutoHide");
+		}
+
+		private IEnumerator doAutoHide() {
+			yield return new WaitForSeconds(AUTO_HIDE_DELAY);
+			hideAdjustmentUI();
 		}
 
 		private void resetToDefaultAmbience() {

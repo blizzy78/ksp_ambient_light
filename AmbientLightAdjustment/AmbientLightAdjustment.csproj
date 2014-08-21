@@ -67,7 +67,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>del $(TargetDir)\*.pdb $(TargetDir)\UnityEngine.dll $(TargetDir)\Toolbar.dll $(TargetDir)\Assembly-CSharp*.dll $(TargetDir)\Mono.*.dll $(TargetDir)\TDx*.dll</PostBuildEvent>
+    <PostBuildEvent>del $(TargetDir)\*.pdb $(TargetDir)\UnityEngine.dll $(TargetDir)\Toolbar.dll $(TargetDir)\Assembly-CSharp*.dll $(TargetDir)\Mono.*.dll $(TargetDir)\TDx*.dll
+xcopy /Y $(ProjectDir)etc\*.tga $(TargetDir)</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
